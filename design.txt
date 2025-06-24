@@ -1,0 +1,11 @@
+
+What can each rule specifiy?
+ - the regex too match a given token
+ - the order that this rule should be applied
+ - whether we should capture this token! I.e. do we want it to be included in the result?
+
+
+Tokenizer ts = new Tokenizer();
+
+
+ts.addRule("int|float|double|");
