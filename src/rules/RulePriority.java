@@ -1,4 +1,4 @@
-package src;
+package src.rules;
 
 public enum RulePriority {
     IMMEDIATE(3),

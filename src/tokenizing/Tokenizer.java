@@ -1,29 +1,80 @@
-package src;
 
+package src.tokenizing;
 
-import java.util.Map;
-import java.util.HashMap;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.ArrayList;
 
+import src.rules.Rule;
+import src.rules.RulePriority;
 
+
+/**
+ * A tokenizer contains rules, rules are strings that get applied 
+ * as regular expressions to tokenize a text. Rules are given an
+ * 'order' which specifies when they should be processed, i.e.
+ * rules of higher order try to match a token earlier than those
+ * of lower order. Rules of the same order are then sorted by
+ * their 'RulePriority'. Rules of higher priority are processed
+ * before those of lower priority with the same order.
+ * 
+ * E.g.
+ * 
+ * Order | Rule(RulePriority) ..
+ * ------------------------------
+ *    0  | A(3) B(2) C(1) D(1)
+ *    1  | X(2) Y(2) Z(2)
+ *    2  | a(3) b(1) c(1)
+ * 
+ *  > addRule(1, W(3))
+ * 1 | W(3) X(2) Y(2) Z(2)
+ * 
+ */
 
 public class Tokenizer {
+
+    public static record TMatchResult(String token, Rule rule) {
+        public boolean isCapturable() { return rule.isCapturable(); }
+    }
 
     private final int startOrder;
     private int topOrder;
 
-    private Map<Integer, List<Rule>> rules;
+    // map of order -> list of rules
+    private NavigableMap<Integer, List<Rule>> rules;
 
-    // public Tokenizer() {
-    //     this(0);
-    // }
 
+    public Tokenizer() {
+        this(0, false);
+    }
+    public Tokenizer(boolean skipWhitespace) {
+        this(0, skipWhitespace);
+    }
     public Tokenizer(int startOrder) {
-        rules = new HashMap<>();
+        this(startOrder, false);
+    }
+    public Tokenizer(int startOrder, boolean skipWhitespace) {
+        rules = new TreeMap<>();
 
         this.startOrder = startOrder;
         this.topOrder = startOrder;
+
+        if (skipWhitespace) {
+            addRule(Rule.of("\\s+", RulePriority.IMMEDIATE, false));
+        }
+    }
+
+
+    public List<TMatchResult> rawTokens(String input) throws Exception {
+        return TokenizerEngine.tokenize(input, rules);
+    }
+
+    public List<String> stringTokens(String input) throws Exception {
+        return TokenizerEngine.tokenize(input, rules)
+            .stream()
+            .map(e -> e.token())
+            .toList();
     }
 
 
@@ -98,12 +149,10 @@ public class Tokenizer {
         }
     }
 
-
     @Override
     public String toString() {
         return rules.toString();
     }
-
 
 }
 
