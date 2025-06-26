@@ -5,23 +5,23 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 
-public class Rule {
+public class TRule {
 
     private final String rule;
     private final Pattern regex;
-    private final RulePriority priority;
+    private final TRulePriority priority;
     private final boolean isCapturable;
 
-    public Rule(String rule) {
-        this(rule, RulePriority.NATURAL, true);
+    public TRule(String rule) {
+        this(rule, TRulePriority.NATURAL, true);
     }
-    public Rule(String rule, RulePriority priority) {
+    public TRule(String rule, TRulePriority priority) {
         this(rule, priority, true);
     }
-    public Rule(String rule, boolean capture) {
-        this(rule, RulePriority.NATURAL, capture);
+    public TRule(String rule, boolean capture) {
+        this(rule, TRulePriority.NATURAL, capture);
     }
-    public Rule(String rule, RulePriority priority, boolean capture) {
+    public TRule(String rule, TRulePriority priority, boolean capture) {
         Objects.requireNonNull(rule);
         Objects.requireNonNull(priority);
 
@@ -32,30 +32,30 @@ public class Rule {
         try {
             this.regex = Pattern.compile(rule);
         } catch (PatternSyntaxException e) {
-            String errMsg = String.format("ERR: Rule could not be compiled to regex! Stack trace:\n%s\n", e.getMessage());
+            String errMsg = String.format("ERR: Rule could not be compiled to regex! Stack trace:\n%s\n", e.getStackTrace().toString());
             throw new IllegalArgumentException(errMsg);
         }
     }
 
 
-    public static Rule of(String rule) {
-        return new Rule(rule);
+    public static TRule of(String rule) {
+        return new TRule(rule);
     }
-    public static Rule of(String rule, RulePriority priority) {
-        return new Rule(rule, priority);
+    public static TRule of(String rule, TRulePriority priority) {
+        return new TRule(rule, priority);
     }
-    public static Rule of(String rule, boolean capture) {
-        return new Rule(rule, capture);
+    public static TRule of(String rule, boolean capture) {
+        return new TRule(rule, capture);
     }
-    public static Rule of(String rule, RulePriority priority, boolean capture) {
-        return new Rule(rule, priority, capture);
+    public static TRule of(String rule, TRulePriority priority, boolean capture) {
+        return new TRule(rule, priority, capture);
     }
 
 
     // getters
     public String rule() { return rule; }
     public Pattern regex() { return regex; }
-    public RulePriority priority() { return priority; }
+    public TRulePriority priority() { return priority; }
     public boolean isCapturable() { return isCapturable; }
 
     @Override

@@ -1,17 +1,17 @@
 package src.rules;
 
-public enum RulePriority {
+public enum TRulePriority {
     IMMEDIATE(3),
     NATURAL(2),
     END(1);
 
     public final int PRIORITY_LEVEL;
 
-    RulePriority(int priority) {
+    TRulePriority(int priority) {
         PRIORITY_LEVEL = priority;
     }
 
-    public static boolean isHigherPriority(RulePriority first, RulePriority other) {
+    public static boolean isHigherPriority(TRulePriority first, TRulePriority other) {
         return first.PRIORITY_LEVEL > other.PRIORITY_LEVEL;
     }
 

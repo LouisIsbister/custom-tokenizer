@@ -2,7 +2,7 @@ package test;
 
 import src.rules.*;
 import src.tokenizing.Tokenizer;
-import src.tokenizing.Tokenizer.TMatchResult;
+import src.tokenizing.TMatchResult;
 
 import static test.TestUtil.T;
 
@@ -16,9 +16,9 @@ public class Tests {
 
     @Test
     public void ruleToString() {
-        Rule r1 = Rule.of("r1", RulePriority.IMMEDIATE, true);
-        Rule r2 = Rule.of("r2", RulePriority.END);
-        Rule r3 = Rule.of("r3", RulePriority.NATURAL, false);
+        TRule r1 = TRule.of("r1", TRulePriority.IMMEDIATE, true);
+        TRule r2 = TRule.of("r2", TRulePriority.END);
+        TRule r3 = TRule.of("r3", TRulePriority.NATURAL, false);
 
         Assertions.assertEquals("r1(3)", r1.toString());
         Assertions.assertEquals("r2(1)", r2.toString());
@@ -36,8 +36,8 @@ public class Tests {
 
     @Test
     public void tokenizerToString() {
-        Rule r1 = Rule.of("float", RulePriority.IMMEDIATE, true);
-        Rule r2 = Rule.of("hello", RulePriority.NATURAL, false);
+        TRule r1 = TRule.of("float", TRulePriority.IMMEDIATE, true);
+        TRule r2 = TRule.of("hello", TRulePriority.NATURAL, false);
 
         Tokenizer ts = new Tokenizer(0);
         ts.addRule(0, r1);
@@ -101,9 +101,9 @@ public class Tests {
     public void testTokenizationC() throws Exception {
         String input = "  r1 r2   r3   r1 ";
 
-        Rule r1 = Rule.of("r1", RulePriority.NATURAL, true); 
-        Rule r2 = Rule.of("r2", RulePriority.NATURAL, false);
-        Rule r3 = Rule.of("r3", RulePriority.NATURAL, true);
+        TRule r1 = TRule.of("r1", TRulePriority.NATURAL, true); 
+        TRule r2 = TRule.of("r2", TRulePriority.NATURAL, false);
+        TRule r3 = TRule.of("r3", TRulePriority.NATURAL, true);
 
         Tokenizer ts1 = new Tokenizer(0, true);
         ts1.addRule(0, r1); ts1.addRule(0, r2); ts1.addRule(0, r3);
@@ -134,21 +134,21 @@ public class Tests {
 
         Tokenizer ts = new Tokenizer(0, true);
         
-        Rule typeRule =    Rule.of("(float|int|string)", RulePriority.IMMEDIATE);
-        Rule syntaxRule =  Rule.of(";|\\=", RulePriority.NATURAL);
-        Rule newlineRule = Rule.of("\\r\\n\\t", RulePriority.NATURAL, false);
+        TRule typeRule =    TRule.of("(float|int|string)");
+        TRule syntaxRule =  TRule.of(";|\\=");
+        TRule newlineRule = TRule.of("\\r\\n\\t", false);
         ts.addRule(0, typeRule);
         ts.addRule(syntaxRule);
         ts.addRule(newlineRule);
 
-        Rule stringValRule = Rule.of("\".*?\"", RulePriority.NATURAL);
-        Rule floatValRule =  Rule.of("-?\\d+\\.\\d+", RulePriority.NATURAL);
-        Rule intValRule =    Rule.of("-?\\d+", RulePriority.NATURAL);
+        TRule stringValRule = TRule.of("\".*?\"");
+        TRule floatValRule =  TRule.of("-?\\d+\\.\\d+");
+        TRule intValRule =    TRule.of("-?\\d+");
         ts.addRule(1, stringValRule);
         ts.addRule(floatValRule);
         ts.addRule(intValRule);
 
-        Rule varRule = Rule.of("[a-zA-Z_][a-zA-Z_0-9]+", RulePriority.END);
+        TRule varRule = TRule.of("[a-zA-Z_][a-zA-Z_0-9]+");
         ts.addRule(2, varRule);
 
         List<TMatchResult> tokens = ts.rawTokens(test);

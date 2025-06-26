@@ -7,8 +7,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import src.rules.Rule;
-import src.tokenizing.Tokenizer.TMatchResult;
+import src.rules.TRule;
 
 public class TokenizerEngine {
 
@@ -20,7 +19,7 @@ public class TokenizerEngine {
      * @return list of generated tokens
      * @throws Exception
      */
-    public static List<TMatchResult> tokenize(String input, NavigableMap<Integer, List<Rule>> rules) throws Exception {
+    public static List<TMatchResult> tokenize(String input, NavigableMap<Integer, List<TRule>> rules) throws Exception {
         List<TMatchResult> ret = new ArrayList<>();
 
         int index = 0;
@@ -49,9 +48,9 @@ public class TokenizerEngine {
      * @param input the provided string to be tokenized
      * @return the match result
      */
-    private static Optional<TMatchResult> retrieveNextToken(String input, NavigableMap<Integer, List<Rule>> rules) {
+    private static Optional<TMatchResult> retrieveNextToken(String input, NavigableMap<Integer, List<TRule>> rules) {
         for (int order : rules.keySet()) {
-            for (Rule rule : rules.get(order)) {
+            for (TRule rule : rules.get(order)) {
                 Optional<String> token = tryMatch(rule, input);
                 if (!token.isPresent()) {
                     continue;
@@ -71,7 +70,7 @@ public class TokenizerEngine {
      * @param input again the string to be tokenized
      * @return
      */
-    private static Optional<String> tryMatch(Rule rule, String input) {
+    private static Optional<String> tryMatch(TRule rule, String input) {
         Pattern pat = rule.regex();
         
         Matcher matcher = pat.matcher(input);

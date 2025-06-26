@@ -6,8 +6,8 @@ import java.util.TreeMap;
 import java.util.List;
 import java.util.ArrayList;
 
-import src.rules.Rule;
-import src.rules.RulePriority;
+import src.rules.TRule;
+import src.rules.TRulePriority;
 
 
 /**
@@ -34,15 +34,11 @@ import src.rules.RulePriority;
 
 public class Tokenizer {
 
-    public static record TMatchResult(String token, Rule rule) {
-        public boolean isCapturable() { return rule.isCapturable(); }
-    }
-
     private final int startOrder;
     private int topOrder;
 
     // map of order -> list of rules
-    private NavigableMap<Integer, List<Rule>> rules;
+    private NavigableMap<Integer, List<TRule>> rules;
 
 
     public Tokenizer() {
@@ -61,7 +57,7 @@ public class Tokenizer {
         this.topOrder = startOrder;
 
         if (skipWhitespace) {
-            addRule(Rule.of("\\s+", RulePriority.IMMEDIATE, false));
+            addRule(TRule.of("\\s+", TRulePriority.IMMEDIATE, false));
         }
     }
 
@@ -71,14 +67,19 @@ public class Tokenizer {
     }
 
     public List<String> stringTokens(String input) throws Exception {
-        return TokenizerEngine.tokenize(input, rules)
-            .stream()
-            .map(e -> e.token())
+        return TokenizerEngine.tokenize(input, rules).stream()
+            .map(TMatchResult::token)
+            .toList();
+    }
+
+    public List<String> stringTokens(List<TMatchResult> matches) throws Exception {
+        return matches.stream()
+            .map(TMatchResult::token)
             .toList();
     }
 
 
-    public void addRule(Rule rule) { 
+    public void addRule(TRule rule) { 
         addRule(topOrder, rule);
     }
 
@@ -90,11 +91,9 @@ public class Tokenizer {
      * @param rule  the rule object itself
      * @param priority the prioirty of this rule with respect to other rules of the same order!
      */
-    public void addRule(int order, Rule rule) {
+    public void addRule(int order, TRule rule) {
         updateTokenizer(order);
-
-        List<Rule> rulesOfOrder = rules.get(order);
-        insertRuleByPriority(rulesOfOrder, rule);
+        insertRuleByPriority(rules.get(order), rule);
     }
 
 
@@ -107,21 +106,21 @@ public class Tokenizer {
      * @param insertRule the rule to be added
      * @return
      */
-    private boolean insertRuleByPriority(List<Rule> rules, Rule insertRule) {
+    private boolean insertRuleByPriority(List<TRule> rules, TRule insertRule) {
         if (rules.isEmpty()) {
             rules.add(insertRule);
             return true;
         }
 
-        RulePriority insertPr = insertRule.priority();
-        RulePriority lastRulePr = rules.get(rules.size() - 1).priority();
+        TRulePriority insertPr = insertRule.priority();
+        TRulePriority lastRulePr = rules.get(rules.size() - 1).priority();
         if (lastRulePr.PRIORITY_LEVEL >= insertPr.PRIORITY_LEVEL) {
             rules.add(insertRule);
             return true;
         }
 
         for (int i = 0; i < rules.size(); i++) {
-            RulePriority currentPr = rules.get(i).priority();
+            TRulePriority currentPr = rules.get(i).priority();
 
             if (insertPr.PRIORITY_LEVEL > currentPr.PRIORITY_LEVEL) {
                 rules.add(i, insertRule);
