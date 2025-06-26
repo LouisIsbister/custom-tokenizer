@@ -17,8 +17,8 @@ public class Tests {
     @Test
     public void ruleToString() {
         TRule r1 = TRule.of("r1", TRulePriority.IMMEDIATE, true);
-        TRule r2 = TRule.of("r2", TRulePriority.END);
-        TRule r3 = TRule.of("r3", TRulePriority.NATURAL, false);
+        TRule r2 = TRule.of("r2", TRulePriority.END,       true);
+        TRule r3 = TRule.of("r3", TRulePriority.NATURAL,   false);
 
         Assertions.assertEquals("r1(3)", r1.toString());
         Assertions.assertEquals("r2(1)", r2.toString());
