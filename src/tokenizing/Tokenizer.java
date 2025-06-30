@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 import src.rules.TRule;
 import src.rules.TRulePriority;
+import src.tokenizing.TokenizerEngine.TEngineMatch;
+
 
 
 /**
@@ -34,22 +36,24 @@ import src.rules.TRulePriority;
 
 public class Tokenizer {
 
+    public static enum Order {
+        CURRENT,
+        START_NEW,
+    }
+
     private final int startOrder;
     private int topOrder;
 
-    // map of order -> list of rules
+    /* map of order -> list of rules */
     private NavigableMap<Integer, List<TRule>> rules;
 
 
-    public Tokenizer() {
-        this(0, false);
-    }
-    public Tokenizer(boolean skipWhitespace) {
-        this(0, skipWhitespace);
-    }
-    public Tokenizer(int startOrder) {
-        this(startOrder, false);
-    }
+    /**
+     * Fully parametised constructor
+     * 
+     * @param startOrder     
+     * @param skipWhitespace whether leading whitespace sequences should be ignored by default
+     */
     public Tokenizer(int startOrder, boolean skipWhitespace) {
         rules = new TreeMap<>();
 
@@ -60,24 +64,39 @@ public class Tokenizer {
             addRule(TRule.of("\\s+", TRulePriority.IMMEDIATE, false));
         }
     }
+    public Tokenizer() {
+        this(0, false);
+    }
+    public Tokenizer(boolean skipWhitespace) {
+        this(0, skipWhitespace);
+    }
+    public Tokenizer(int startOrder) {
+        this(startOrder, false);
+    }
 
+    //
+    //
+    //
 
-    public List<TMatchResult> rawTokens(String input) throws Exception {
+    public List<TEngineMatch> rawTokens(String input) throws TokenizerFailureException {
         return TokenizerEngine.tokenize(input, rules);
     }
 
-    public List<String> stringTokens(String input) throws Exception {
-        return TokenizerEngine.tokenize(input, rules).stream()
-            .map(TMatchResult::token)
-            .toList();
+    public List<String> stringTokens(String input) throws TokenizerFailureException {
+        return stringTokens(rawTokens(input));
     }
 
-    public List<String> stringTokens(List<TMatchResult> matches) throws Exception {
+    public List<String> stringTokens(List<TEngineMatch> matches) throws TokenizerFailureException {
         return matches.stream()
-            .map(TMatchResult::token)
+            .map(TEngineMatch::token)
             .toList();
     }
 
+    public void addRulesOfOrder(int order, TRule... rules) {
+        for (TRule rule : rules) {
+            addRule(order, rule);
+        }
+    }
 
     public void addRule(TRule rule) { 
         addRule(topOrder, rule);

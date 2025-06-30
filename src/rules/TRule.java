@@ -7,18 +7,24 @@ import java.util.regex.PatternSyntaxException;
 
 public class TRule {
 
+    /* the pattern associated with this rule */
     private final Pattern regex;
+
+    /* priority of this rule relative to other rules of the same order */
     private final TRulePriority priority;
+    
+    /* whether tokens captured by the regex should be captured or ignored */
     private final boolean isCapturable;
 
-
-    public TRule(String rule) {
-        this(rule, TRulePriority.NATURAL, true);
-    }
-    public TRule(String rule, boolean capture) {
-        this(rule, TRulePriority.NATURAL, capture);
-    }
+    /**
+     * Fully parametised constructor
+     * 
+     * @param rule     the regex string associated with the rule
+     * @param priority the priority of this rule
+     * @param capture  whether to capture this rules tokens
+     */
     public TRule(String rule, TRulePriority priority, boolean capture) {
+        Objects.requireNonNull(rule);
         Objects.requireNonNull(priority);
 
         this.priority = priority;
@@ -31,20 +37,27 @@ public class TRule {
             throw new IllegalArgumentException(errMsg);
         }
     }
-
-
+    /* optional constructor A */
+    public TRule(String rule) {
+        this(rule, TRulePriority.NATURAL, true);
+    }
+    /* optional constructor B */
+    public TRule(String rule, boolean capture) {
+        this(rule, TRulePriority.NATURAL, capture);
+    }
+    
+    /* factory methods for creating rules */
+    public static TRule of(String rule, TRulePriority priority, boolean capture) {
+        return new TRule(rule, priority, capture);
+    }
     public static TRule of(String rule) {
         return new TRule(rule);
     }
     public static TRule of(String rule, boolean capture) {
         return new TRule(rule, capture);
     }
-    public static TRule of(String rule, TRulePriority priority, boolean capture) {
-        return new TRule(rule, priority, capture);
-    }
 
-
-    // getters
+    /* rule information getters */ 
     public String rule() { return regex.pattern(); }
     public Pattern regex() { return regex; }
     public TRulePriority priority() { return priority; }

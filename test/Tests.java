@@ -1,8 +1,8 @@
 package test;
 
 import src.rules.*;
-import src.tokenizing.Tokenizer;
-import src.tokenizing.TMatchResult;
+import src.tokenizing.*;
+import src.tokenizing.TokenizerEngine.TEngineMatch;
 
 import static test.TestUtil.T;
 
@@ -106,18 +106,17 @@ public class Tests {
         TRule r3 = TRule.of("r3", TRulePriority.NATURAL, true);
 
         Tokenizer ts1 = new Tokenizer(0, true);
-        ts1.addRule(0, r1); ts1.addRule(0, r2); ts1.addRule(0, r3);
-        
-        List<String> tokens = ts1.stringTokens(input);
+        Tokenizer ts2 = new Tokenizer(0, false);
+        ts1.addRulesOfOrder(0, r1, r2, r3);
+        ts2.addRulesOfOrder(0, r1, r2, r3);
+
         Assertions.assertEquals(
             List.of("r1", "r3", "r1"),
-            tokens
+            ts1.stringTokens(input)
         );
 
-        Tokenizer ts2 = new Tokenizer(0, false);
-        ts2.addRule(0, r1); ts2.addRule(0, r2); ts2.addRule(0, r3);
         Assertions.assertThrows(
-            Exception.class,
+            TokenizerFailureException.class,
             () -> ts2.stringTokens(input)
         );
 
@@ -130,31 +129,27 @@ public class Tests {
 
     @Test
     public void testUsageA() throws Exception {
-        String test = "int abc = 1; float xyz = 6.56; string str = \"hello world\";";
+        String test = "int a_b_c = 1; float xyz = 6.56; string str = \"hello world\";";
 
         Tokenizer ts = new Tokenizer(0, true);
         
         TRule typeRule =    TRule.of("(float|int|string)");
         TRule syntaxRule =  TRule.of(";|\\=");
         TRule newlineRule = TRule.of("\\r\\n\\t", false);
-        ts.addRule(0, typeRule);
-        ts.addRule(syntaxRule);
-        ts.addRule(newlineRule);
+        ts.addRulesOfOrder(0, typeRule, syntaxRule, newlineRule);
 
         TRule stringValRule = TRule.of("\".*?\"");
         TRule floatValRule =  TRule.of("-?\\d+\\.\\d+");
         TRule intValRule =    TRule.of("-?\\d+");
-        ts.addRule(1, stringValRule);
-        ts.addRule(floatValRule);
-        ts.addRule(intValRule);
+        ts.addRulesOfOrder(1, stringValRule, floatValRule, intValRule);
 
-        TRule varRule = TRule.of("[a-zA-Z_][a-zA-Z_0-9]+");
-        ts.addRule(2, varRule);
+        TRule varRule = TRule.of("[a-zA-Z][a-zA-Z_0-9]+");
+        ts.addRulesOfOrder(2, varRule);
 
-        List<TMatchResult> tokens = ts.rawTokens(test);
+        List<TEngineMatch> tokens = ts.rawTokens(test);
         Assertions.assertEquals(
             List.of(
-                T("int", typeRule), T("abc", varRule), T("=", syntaxRule), T("1", intValRule), T(";", syntaxRule),
+                T("int", typeRule), T("a_b_c", varRule), T("=", syntaxRule), T("1", intValRule), T(";", syntaxRule),
                 T("float", typeRule), T("xyz", varRule), T("=", syntaxRule), T("6.56", floatValRule),T(";", syntaxRule),
                 T("string", typeRule), T("str", varRule), T("=", syntaxRule), T("\"hello world\"", stringValRule),T(";", syntaxRule)
             ),

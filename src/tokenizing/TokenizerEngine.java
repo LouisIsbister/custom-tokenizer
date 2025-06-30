@@ -2,8 +2,8 @@ package src.tokenizing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,30 +11,31 @@ import src.rules.TRule;
 
 public class TokenizerEngine {
 
+    public static record TEngineMatch(
+        String token, 
+        TRule rule
+    ) {}
+
+
     /**
      * Iterate though the input string continously retrieving the 
      * next token and appending it to the result list.
      * 
      * @param input the string to be tokenized
      * @return list of generated tokens
-     * @throws Exception
+     * @throws TokenizerFailureException
      */
-    public static List<TMatchResult> tokenize(String input, NavigableMap<Integer, List<TRule>> rules) throws Exception {
-        List<TMatchResult> ret = new ArrayList<>();
+    public static List<TEngineMatch> tokenize(String input, NavigableMap<Integer, List<TRule>> rules) throws TokenizerFailureException {
+        List<TEngineMatch> ret = new ArrayList<>();
 
+        final int length = input.length();
         int index = 0;
-        while (index < input.length()) {
-            String next = input.substring(index);
+        while (index < length) {
+            TEngineMatch engineMatch = retrieveNextToken(input, index, rules);
+            index += engineMatch.token().length();
 
-            Optional<TMatchResult> match = retrieveNextToken(next, rules);
-            if (!match.isPresent()) {
-                throw new Exception(matchFailureMsg(next));
-            }
- 
-            TMatchResult matched = match.get();
-            index += matched.token().length();
-            if (matched.isCapturable()) {
-                ret.add(matched);
+            if (engineMatch.rule().isCapturable()) {
+                ret.add(engineMatch);
             }
         }
 
@@ -46,43 +47,36 @@ public class TokenizerEngine {
      * Iterate every rules until a match is found and return the result.
      * 
      * @param input the provided string to be tokenized
+     * @param index the start index to search in the input string
+     * @param rules the tokenizers rules
      * @return the match result
+     * @throws TokenizerFailureException 
      */
-    private static Optional<TMatchResult> retrieveNextToken(String input, NavigableMap<Integer, List<TRule>> rules) {
-        for (int order : rules.keySet()) {
-            for (TRule rule : rules.get(order)) {
-                Optional<String> token = tryMatch(rule, input);
-                if (!token.isPresent()) {
-                    continue;
-                }
+    private static TEngineMatch retrieveNextToken(String input, int index, NavigableMap<Integer, List<TRule>> rules) throws TokenizerFailureException {
+        final int inputLength = input.length();
+        
+        for (Map.Entry<Integer, List<TRule>> entry : rules.entrySet()) {
+            for (TRule rule : entry.getValue()) {
+                Pattern pat = rule.regex();
+                Matcher matcher = pat.matcher(input);
+                matcher.region(index, inputLength);
 
-                TMatchResult res = new TMatchResult(token.get(), rule);
-                return Optional.of(res) ;
+                if (matcher.find() && matcher.start() == index) {
+                    return new TEngineMatch(matcher.group(), rule); 
+                }
             }
         }
-        return Optional.empty();
+
+        String inputWindow = errorInputWindow(input);
+        String errMsg = String.format("Failed to tokenize the beginning of sequence: '%s'\nPlease verify your rule set.", inputWindow);
+        throw new TokenizerFailureException(errMsg);
     }
 
-    /**
-     * Try and match a given rule to the input
-     *
-     * @param rule the rule to be applied
-     * @param input again the string to be tokenized
-     * @return
-     */
-    private static Optional<String> tryMatch(TRule rule, String input) {
-        Pattern pat = rule.regex();
-        
-        Matcher matcher = pat.matcher(input);
-        if (matcher.find() && matcher.start() == 0) {
-            return Optional.of(matcher.group());
-        }
-        return Optional.empty();
+    private static final int INPUT_WINDOW_SIZE = 25;
+    private static final String errorInputWindow(String input) {
+        return input.length() < INPUT_WINDOW_SIZE ? 
+                input :
+                input.substring(0, INPUT_WINDOW_SIZE);
     }
 
-
-    private static final String matchFailureMsg(String input) {
-        int end = input.length() < 10 ? input.length() : 10;
-        return String.format("Given rules could not match the beginning of input: '%s'...\n", input.substring(0, end));
-    }
 }
