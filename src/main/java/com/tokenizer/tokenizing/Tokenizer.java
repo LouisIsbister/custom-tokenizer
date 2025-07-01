@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 
-
 /**
  * A tokenizer contains rules, rules are strings that get applied 
  * as regular expressions to tokenize a text. Rules are given an
@@ -28,17 +27,11 @@ import java.util.ArrayList;
  *    2   | X(2) Y(2) Z(2)
  *    3   | a(3) b(1) c(1)
  * 
- *  > addRule(1, W(3))
- * 1 | W(3) X(2) Y(2) Z(2)
- * 
+ *  > addRule -> W(3)
+ * 3 | a(3) W(3) b(1) c(1)
  */
 
 public class Tokenizer {
-
-    public static enum Ordering {
-        CURRENT_ORDER,
-        NEXT_ORDER,
-    }
 
     /* the current `order` count of rules */
     private int order;
@@ -65,48 +58,59 @@ public class Tokenizer {
         this(false);
     }
 
-    //
-    //
-    //
-
+    
+    /**
+     * Tokenize the input string and return the list of TEngineMatch objects
+     * @param input to be tokenized
+     * @return      the list of generated tokens
+     * @throws TokenizerFailureException
+     */
     public List<TEngineMatch> rawTokens(String input) throws TokenizerFailureException {
         return TokenizerEngine.tokenize(input, rules);
     }
 
+    /**
+     * Tokenize the input string and return the list of strign tokens 
+     * @param input
+     * @return
+     * @throws TokenizerFailureException
+     */
     public List<String> stringTokens(String input) throws TokenizerFailureException {
-        return stringTokens(rawTokens(input));
+        return rawTokensToStrings(rawTokens(input));
     }
 
-    public List<String> stringTokens(List<TEngineMatch> matches) throws TokenizerFailureException {
+    /**
+     * Converts a list of TEngineMatch objects to their strings
+     * @param matches   the generated tokens
+     * @return          the tokens in sting form
+     * @throws TokenizerFailureException
+     */
+    public List<String> rawTokensToStrings(List<TEngineMatch> matches) throws TokenizerFailureException {
         return matches.stream()
             .map(TEngineMatch::token)
             .toList();
     }
 
+
+    /**
+     * Add N number of rules to the tokenizer
+     * @param rules the rules to be added
+     * @return      the current tokenizer object
+     */
     public Tokenizer addMultipleRules(TRule... rules) {
         for (TRule rule : rules) {
-            addRule(rule); // additionOrder
+            addRule(rule);
         }
         return this;
     }
 
     /**
-     * Given a rule and an order, update the tokenizers state then add the rule to the
-     * rules map.
-     * 
-     * @param order the order at which this rule will be processed relative to other rules
-     * @param rule  the rule object itself
-     * @param priority the prioirty of this rule with respect to other rules of the same order!
+     * @param rule the rule object to be added to the tokenizer
      */
     public Tokenizer addRule(TRule rule) {
-        // updateTokenizer(additionOrder);
         insertRuleByPriority(rules.get(this.order), rule);
         return this;
     }
-
-    // public Tokenizer addRule(TRule rule) { 
-    //     return addRule(Ordering.CURRENT_ORDER, rule);
-    // }
 
 
     /**
@@ -114,7 +118,7 @@ public class Tokenizer {
      * For example, if rule X has priority 3 (IMMEDIATE) and we have a list of rules
      * [A(3), B(2), C(2), D(1)] we want that to become [A(3), X(3), B(2), C(2), D(1)] 
      * 
-     * @param rules the list of rules
+     * @param rules      the list of rules
      * @param insertRule the rule to be added
      */
     private void insertRuleByPriority(List<TRule> rules, TRule insertRule) {
@@ -149,17 +153,6 @@ public class Tokenizer {
         }
         return this;
     }
-
-    // private void updateTokenizer(Ordering addingOrder) {
-    //     if (addingOrder == Ordering.NEXT_ORDER) {
-    //         this.order++;
-    //     }
-
-    //     // if the order is not a key in the rules map then add it
-    //     if (!rules.containsKey(order)) {
-    //         rules.put(order, new ArrayList<>());
-    //     }
-    // }
 
     @Override
     public String toString() {

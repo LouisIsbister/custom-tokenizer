@@ -10,6 +10,10 @@ import java.util.regex.Pattern;
 
 public class TokenizerEngine {
 
+    /**
+     * Record that contian both the token itself as well
+     * as a reference to the rule that provided the match
+     */
     public static record TEngineMatch(
         String token, 
         TRule rule
@@ -70,6 +74,7 @@ public class TokenizerEngine {
         String errMsg = String.format("Failed to tokenize the beginning of sequence: '%s'\nPlease verify your rule set.", inputWindow);
         throw new TokenizerFailureException(errMsg);
     }
+
 
     private static final int INPUT_WINDOW_SIZE = 25;
     private static final String errorInputWindow(String input) {
