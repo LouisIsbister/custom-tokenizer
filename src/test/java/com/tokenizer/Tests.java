@@ -1,21 +1,16 @@
-package test;
+package com.tokenizer;
+import static com.tokenizer.TestUtil.T;
 
-import src.rules.*;
-import src.tokenizing.*;
-import src.tokenizing.TokenizerEngine.TEngineMatch;
-
-import static test.TestUtil.T;
-
+import com.tokenizer.rules.*;
+import com.tokenizer.tokenizing.*;
+import com.tokenizer.tokenizing.TokenizerEngine.TEngineMatch;
 import java.util.List;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-
 
 public class Tests {
 
-    @Test
-    public void ruleToString() {
+    @Test public void ruleToString() {
         TRule r1 = TRule.of("r1", TRulePriority.IMMEDIATE, true);
         TRule r2 = TRule.of("r2", TRulePriority.END,       true);
         TRule r3 = TRule.of("r3", TRulePriority.NATURAL,   false);
@@ -29,8 +24,7 @@ public class Tests {
         Assertions.assertEquals("[r3(2) false]", r3.fullToString());
     }
 
-    @Test
-    public void tokenizerToString() {
+    @Test public void tokenizerToString() {
         TRule r1 = TRule.of("float", TRulePriority.IMMEDIATE, true);
         TRule r2 = TRule.of("hello", TRulePriority.NATURAL, false);
 
@@ -47,8 +41,7 @@ public class Tests {
 
 
 
-    @Test
-    public void testRulePriorityA() {
+    @Test public void testRulePriorityA() {
         Tokenizer ts = TestUtil.generateTestTokenizerA();
         Assertions.assertEquals(
             "{1=[r1(3), r4(3), r6(3), r3(2), r2(1), r5(1)]}",
@@ -56,8 +49,7 @@ public class Tests {
         );
     }
 
-    @Test
-    public void testRulePriorityB() {
+    @Test public void testRulePriorityB() {
         Tokenizer ts = TestUtil.generateTestTokenizerB();
         Assertions.assertEquals(
             "{1=[r1(3), r3(2)], 2=[r4(3), r2(1), r5(1)], 3=[r6(3)]}",
@@ -67,8 +59,7 @@ public class Tests {
 
 
 
-    @Test
-    public void testTokenizationA() throws Exception {
+    @Test public void testTokenizationA() throws Exception {
         Tokenizer ts = TestUtil.generateTestTokenizerA();
 
         List<String> tokens = ts.stringTokens("r1r2r4r5r6r1r1r4r3");
@@ -78,8 +69,7 @@ public class Tests {
         );
     }
 
-    @Test
-    public void testTokenizationB() throws Exception {
+    @Test public void testTokenizationB() throws Exception {
         Tokenizer ts = TestUtil.generateTestTokenizerB();
         List<String> tokens = ts.stringTokens("r1r2r4r5r6r1r1r4r3");
         Assertions.assertEquals(
@@ -88,8 +78,7 @@ public class Tests {
         );
     }
 
-    @Test
-    public void testTokenizationC() throws Exception {
+    @Test public void testTokenizationC() throws Exception {
         String input = "  r1 r2   r3   r1 ";
 
         TRule r1 = TRule.of("r1", TRulePriority.NATURAL, true); 
@@ -114,8 +103,7 @@ public class Tests {
 
 
 
-    @Test
-    public void testUsageVerification() throws Exception {
+    @Test public void testUsageVerification() throws Exception {
         String __test__ = """
             int a_b_c = -1;
             float xyz = 6.56;
@@ -157,8 +145,7 @@ public class Tests {
      * 
      * @throws Exception
      */
-    @Test
-    public void testUsageExample() throws Exception {
+    @Test public void testUsageExample() throws Exception {
         String testExample = """
             int a_b_c = -1;
             float xyz = 6.56;

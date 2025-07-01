@@ -1,9 +1,8 @@
-package test;
+package com.tokenizer;
 
-import src.rules.TRule;
-import src.rules.TRulePriority;
-import src.tokenizing.Tokenizer;
-import src.tokenizing.TokenizerEngine.TEngineMatch;
+import com.tokenizer.rules.*;
+import com.tokenizer.tokenizing.Tokenizer;
+import com.tokenizer.tokenizing.TokenizerEngine.TEngineMatch;
 
 public class TestUtil {
 

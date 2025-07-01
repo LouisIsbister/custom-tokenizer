@@ -1,4 +1,4 @@
-package src.rules;
+package com.tokenizer.rules;
 
 public enum TRulePriority {
     IMMEDIATE(3),

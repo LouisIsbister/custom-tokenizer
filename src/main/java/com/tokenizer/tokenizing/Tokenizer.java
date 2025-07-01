@@ -1,14 +1,13 @@
 
-package src.tokenizing;
+package com.tokenizer.tokenizing;
 
+import com.tokenizer.rules.TRule;
+import com.tokenizer.rules.TRulePriority;
+import com.tokenizer.tokenizing.TokenizerEngine.TEngineMatch;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.List;
 import java.util.ArrayList;
-
-import src.rules.TRule;
-import src.rules.TRulePriority;
-import src.tokenizing.TokenizerEngine.TEngineMatch;
 
 
 
