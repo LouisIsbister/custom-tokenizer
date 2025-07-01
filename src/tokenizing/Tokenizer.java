@@ -23,11 +23,11 @@ import src.tokenizing.TokenizerEngine.TEngineMatch;
  * 
  * E.g.
  * 
- * Order | Rule(RulePriority) ..
+ *  Order | Rule(RulePriority) ..
  * ------------------------------
- *    0  | A(3) B(2) C(1) D(1)
- *    1  | X(2) Y(2) Z(2)
- *    2  | a(3) b(1) c(1)
+ *    1   | A(3) B(2) C(1) D(1)
+ *    2   | X(2) Y(2) Z(2)
+ *    3   | a(3) b(1) c(1)
  * 
  *  > addRule(1, W(3))
  * 1 | W(3) X(2) Y(2) Z(2)
@@ -36,13 +36,13 @@ import src.tokenizing.TokenizerEngine.TEngineMatch;
 
 public class Tokenizer {
 
-    public static enum Order {
-        CURRENT,
-        START_NEW,
+    public static enum Ordering {
+        CURRENT_ORDER,
+        NEXT_ORDER,
     }
 
-    private final int startOrder;
-    private int topOrder;
+    /* the current `order` count of rules */
+    private int order;
 
     /* map of order -> list of rules */
     private NavigableMap<Integer, List<TRule>> rules;
@@ -50,28 +50,20 @@ public class Tokenizer {
 
     /**
      * Fully parametised constructor
-     * 
-     * @param startOrder     
      * @param skipWhitespace whether leading whitespace sequences should be ignored by default
      */
-    public Tokenizer(int startOrder, boolean skipWhitespace) {
+    public Tokenizer(boolean skipWhitespace) {
         rules = new TreeMap<>();
-
-        this.startOrder = startOrder;
-        this.topOrder = startOrder;
+        order = 0;
+        startNextOrder();
 
         if (skipWhitespace) {
             addRule(TRule.of("\\s+", TRulePriority.IMMEDIATE, false));
         }
     }
+
     public Tokenizer() {
-        this(0, false);
-    }
-    public Tokenizer(boolean skipWhitespace) {
-        this(0, skipWhitespace);
-    }
-    public Tokenizer(int startOrder) {
-        this(startOrder, false);
+        this(false);
     }
 
     //
@@ -92,14 +84,11 @@ public class Tokenizer {
             .toList();
     }
 
-    public void addRulesOfOrder(int order, TRule... rules) {
+    public Tokenizer addMultipleRules(TRule... rules) {
         for (TRule rule : rules) {
-            addRule(order, rule);
+            addRule(rule); // additionOrder
         }
-    }
-
-    public void addRule(TRule rule) { 
-        addRule(topOrder, rule);
+        return this;
     }
 
     /**
@@ -110,10 +99,15 @@ public class Tokenizer {
      * @param rule  the rule object itself
      * @param priority the prioirty of this rule with respect to other rules of the same order!
      */
-    public void addRule(int order, TRule rule) {
-        updateTokenizer(order);
-        insertRuleByPriority(rules.get(order), rule);
+    public Tokenizer addRule(TRule rule) {
+        // updateTokenizer(additionOrder);
+        insertRuleByPriority(rules.get(this.order), rule);
+        return this;
     }
+
+    // public Tokenizer addRule(TRule rule) { 
+    //     return addRule(Ordering.CURRENT_ORDER, rule);
+    // }
 
 
     /**
@@ -123,19 +117,18 @@ public class Tokenizer {
      * 
      * @param rules the list of rules
      * @param insertRule the rule to be added
-     * @return
      */
-    private boolean insertRuleByPriority(List<TRule> rules, TRule insertRule) {
+    private void insertRuleByPriority(List<TRule> rules, TRule insertRule) {
         if (rules.isEmpty()) {
             rules.add(insertRule);
-            return true;
+            return;
         }
 
         TRulePriority insertPr = insertRule.priority();
         TRulePriority lastRulePr = rules.get(rules.size() - 1).priority();
         if (lastRulePr.PRIORITY_LEVEL >= insertPr.PRIORITY_LEVEL) {
             rules.add(insertRule);
-            return true;
+            return;
         }
 
         for (int i = 0; i < rules.size(); i++) {
@@ -143,29 +136,31 @@ public class Tokenizer {
 
             if (insertPr.PRIORITY_LEVEL > currentPr.PRIORITY_LEVEL) {
                 rules.add(i, insertRule);
-                return true;
+                return;
             }
         }
-        return false;
     }
 
-    
-    private void updateTokenizer(int order) {
-        if (order < startOrder) {
-            String errMsg = String.format("Order: %s is less than minimum order: %d\n", order, startOrder);
-            throw new IllegalArgumentException(errMsg);
-        }
-
-        // ensure the topOrder is consistent
-        if (order > topOrder) {
-            topOrder = order;
-        }
+    public Tokenizer startNextOrder() {
+        this.order++;
 
         // if the order is not a key in the rules map then add it
         if (!rules.containsKey(order)) {
             rules.put(order, new ArrayList<>());
         }
+        return this;
     }
+
+    // private void updateTokenizer(Ordering addingOrder) {
+    //     if (addingOrder == Ordering.NEXT_ORDER) {
+    //         this.order++;
+    //     }
+
+    //     // if the order is not a key in the rules map then add it
+    //     if (!rules.containsKey(order)) {
+    //         rules.put(order, new ArrayList<>());
+    //     }
+    // }
 
     @Override
     public String toString() {
