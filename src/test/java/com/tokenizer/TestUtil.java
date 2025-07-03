@@ -2,12 +2,12 @@ package com.tokenizer;
 
 import com.tokenizer.rules.*;
 import com.tokenizer.tokenizing.Tokenizer;
-import com.tokenizer.tokenizing.TokenizerEngine.TEngineMatch;
+import com.tokenizer.tokenizing.TokenizerEngine.TEngineToken;
 
 public class TestUtil {
 
-    public static TEngineMatch T(String s, TRule r) {
-        return new TEngineMatch(s, r);
+    public static TEngineToken T(String s, TRule r) {
+        return new TEngineToken(s, r);
     }
 
     public static Tokenizer generateTestTokenizerA() {

@@ -3,7 +3,7 @@ import static com.tokenizer.TestUtil.T;
 
 import com.tokenizer.rules.*;
 import com.tokenizer.tokenizing.*;
-import com.tokenizer.tokenizing.TokenizerEngine.TEngineMatch;
+import com.tokenizer.tokenizing.TokenizerEngine.TEngineToken;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -129,7 +129,7 @@ public class Tests {
             .startNextOrder()
             .addRule(varRule);
 
-        List<TEngineMatch> tokens = ts.rawTokens(__test__);
+        List<TEngineToken> tokens = ts.rawTokens(__test__);
         Assertions.assertEquals(
             List.of(
                 T("int", baseRules[0]), T("a_b_c", varRule), T("=", baseRules[1]), T("-1", valueRules[2]), T(";", baseRules[1]),

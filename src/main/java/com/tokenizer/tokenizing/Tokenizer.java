@@ -3,7 +3,7 @@ package com.tokenizer.tokenizing;
 
 import com.tokenizer.rules.TRule;
 import com.tokenizer.rules.TRulePriority;
-import com.tokenizer.tokenizing.TokenizerEngine.TEngineMatch;
+import com.tokenizer.tokenizing.TokenizerEngine.TEngineToken;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.List;
@@ -58,14 +58,14 @@ public class Tokenizer {
         this(false);
     }
 
-    
+
     /**
-     * Tokenize the input string and return the list of TEngineMatch objects
+     * Tokenize the input string and return the list of TEngineToken objects
      * @param input to be tokenized
      * @return      the list of generated tokens
      * @throws TokenizerFailureException
      */
-    public List<TEngineMatch> rawTokens(String input) throws TokenizerFailureException {
+    public List<TEngineToken> rawTokens(String input) throws TokenizerFailureException {
         return TokenizerEngine.tokenize(input, rules);
     }
 
@@ -80,14 +80,14 @@ public class Tokenizer {
     }
 
     /**
-     * Converts a list of TEngineMatch objects to their strings
+     * Converts a list of TEngineToken objects to their strings
      * @param matches   the generated tokens
      * @return          the tokens in sting form
      * @throws TokenizerFailureException
      */
-    public List<String> rawTokensToStrings(List<TEngineMatch> matches) throws TokenizerFailureException {
+    public List<String> rawTokensToStrings(List<TEngineToken> matches) throws TokenizerFailureException {
         return matches.stream()
-            .map(TEngineMatch::token)
+            .map(TEngineToken::token)
             .toList();
     }
 

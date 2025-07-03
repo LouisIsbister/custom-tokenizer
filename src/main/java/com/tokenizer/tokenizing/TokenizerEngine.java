@@ -14,7 +14,7 @@ public class TokenizerEngine {
      * Record that contian both the token itself as well
      * as a reference to the rule that provided the match
      */
-    public static record TEngineMatch(
+    public static record TEngineToken(
         String token, 
         TRule rule
     ) {}
@@ -28,13 +28,13 @@ public class TokenizerEngine {
      * @return list of generated tokens
      * @throws TokenizerFailureException
      */
-    public static List<TEngineMatch> tokenize(String input, NavigableMap<Integer, List<TRule>> rules) throws TokenizerFailureException {
-        List<TEngineMatch> ret = new ArrayList<>();
+    public static List<TEngineToken> tokenize(String input, NavigableMap<Integer, List<TRule>> rules) throws TokenizerFailureException {
+        List<TEngineToken> ret = new ArrayList<>();
 
         final int length = input.length();
         int index = 0;
         while (index < length) {
-            TEngineMatch engineMatch = retrieveNextToken(input, index, rules);
+            TEngineToken engineMatch = retrieveNextToken(input, index, rules);
             index += engineMatch.token().length();
 
             if (engineMatch.rule().isCapturable()) {
@@ -55,7 +55,7 @@ public class TokenizerEngine {
      * @return the match result
      * @throws TokenizerFailureException 
      */
-    private static TEngineMatch retrieveNextToken(String input, int index, NavigableMap<Integer, List<TRule>> rules) throws TokenizerFailureException {
+    private static TEngineToken retrieveNextToken(String input, int index, NavigableMap<Integer, List<TRule>> rules) throws TokenizerFailureException {
         final int inputLength = input.length();
         
         for (Map.Entry<Integer, List<TRule>> entry : rules.entrySet()) {
@@ -65,7 +65,7 @@ public class TokenizerEngine {
                 matcher.region(index, inputLength);
 
                 if (matcher.find() && matcher.start() == index) {
-                    return new TEngineMatch(matcher.group(), rule); 
+                    return new TEngineToken(matcher.group(), rule); 
                 }
             }
         }
