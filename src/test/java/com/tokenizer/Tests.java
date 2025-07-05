@@ -180,5 +180,41 @@ public class Tests {
         );
     }
 
+    /**
+     * A proper demonstration of how the tokenizer can be utilised!
+     * 
+     * @throws Exception
+     */
+    @Test public void testUsageExampleConcise() throws Exception {
+        String testExample = """
+            int a_b_c = -1;
+            float xyz = 6.56;
+            string str = \"hello world\";
+            """;
+
+        Tokenizer ts = new Tokenizer(true)
+            .addMultipleRules(
+                TRule.of("(float|int|string)"),
+                TRule.of(";|\\="),
+                TRule.of("\\r\\n\\t", false),
+                TRule.of("\".*?\""),
+                TRule.of("-?\\d+\\.\\d+"),
+                TRule.of("-?\\d+"),
+                TRule.of("[a-zA-Z][a-zA-Z_0-9]+")
+            );
+
+
+        // verify the tokens generated
+        List<String> tokens = ts.stringTokens(testExample);
+        Assertions.assertEquals(
+            tokens,
+            List.of(
+                "int", "a_b_c", "=", "-1",";",
+                "float", "xyz", "=", "6.56", ";",
+                "string", "str", "=", "\"hello world\"",";"
+            )
+        );
+    }
+
 }
 
